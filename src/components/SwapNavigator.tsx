@@ -3,11 +3,21 @@ import { ROUTER02 } from "../config/address";
 import { UniswapV2Router02__factory } from "../typechain";
 import { TokenData } from "../interfaces/data/token-data.interface";
 import { provider } from "../utils/provider";
-import { ZeroAddress, formatUnits, parseUnits } from "ethers";
+import {
+  MaxUint256,
+  ZeroAddress,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from "ethers";
 import { TokenDataList } from "../data/tokens";
 import { TokenSelect } from "./TokenSelect";
+import { useWalletClient } from "wagmi";
+import { JsonRpcSigner } from "ethers";
+import { BrowserProvider } from "ethers";
 
 export default function SwapNavigator() {
+  const { data: client } = useWalletClient();
   const [inputValue, setInputValue] = useState("");
   const [outputValue, setOutputValue] = useState("");
   const [selectedInputToken, setSelectedInputToken] = useState<TokenData>();
@@ -30,6 +40,40 @@ export default function SwapNavigator() {
     const router = UniswapV2Router02__factory.connect(ROUTER02, provider);
     const result: bigint[] = await router.getAmountsIn(amountOut, path);
     return result[0];
+  };
+
+  const handleSwap = async () => {
+    const signer =
+      client &&
+      new JsonRpcSigner(
+        new BrowserProvider(client.transport, {
+          chainId: client.chain.id,
+          name: client.chain.name,
+          ensAddress: client.chain.contracts?.ensRegistry?.address,
+        }),
+        client.account.address
+      );
+
+    const router = UniswapV2Router02__factory.connect(ROUTER02, signer);
+    if (isInputNative) {
+      client &&
+        (await router
+          .swapExactETHForTokens(
+            0,
+            [
+              selectedInputToken!.address === ZeroAddress
+                ? (TokenDataList[137][1].address as `0x${string}`)
+                : (selectedInputToken!.address as `0x${string}`),
+              selectedOutputToken!.address === ZeroAddress
+                ? (TokenDataList[137][1].address as `0x${string}`)
+                : (selectedOutputToken!.address as `0x${string}`),
+            ],
+            client.account.address,
+            MaxUint256,
+            { value: parseEther(inputValue) }
+          )
+          .then((tx) => tx.wait()));
+    }
   };
 
   const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -70,10 +114,10 @@ export default function SwapNavigator() {
     }
   };
 
-  const toggleTokens = async () => {
+  const toggleTokens = () => {
     const tmpSelectedInputToken = selectedInputToken;
     const tmpInputValue = inputValue;
-    setSelectedInputToken(selectedInputToken);
+    setSelectedInputToken(selectedOutputToken);
     setSelectedOutputToken(tmpSelectedInputToken);
     setInputValue(outputValue);
     setOutputValue(tmpInputValue);
@@ -94,7 +138,9 @@ export default function SwapNavigator() {
           blockSelectedToken={selectedOutputToken}
         />
       </div>
-      <button onClick={toggleTokens}>swap</button>
+      <button type="button" onClick={toggleTokens}>
+        switch
+      </button>
       <div>
         <input
           type="text"
@@ -108,6 +154,9 @@ export default function SwapNavigator() {
         selectedToken={selectedOutputToken}
         blockSelectedToken={selectedInputToken}
       />
+      <button type="button" onClick={handleSwap}>
+        swap
+      </button>
     </div>
   );
 }

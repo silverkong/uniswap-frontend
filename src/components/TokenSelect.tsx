@@ -22,22 +22,21 @@ export function TokenSelect({
 
   useEffect(() => {
     if (currentChain) setTokenList(TokenDataList[currentChain.id]);
-  });
+  }, []);
 
   return (
-    <div>
-      <select value={selectedToken?.symbol || ""} onChange={handleTokenChange}>
-        <option value="">Select a token</option>
-        {tokenList.map((token, tokenIndex) =>
-          blockSelectedToken && token.address === blockSelectedToken.address ? (
-            <></>
-          ) : (
-            <option key={tokenIndex} value={token.symbol}>
-              {token.symbol}
-            </option>
-          )
-        )}
-      </select>
-    </div>
+    <select value={selectedToken?.symbol || ""} onChange={handleTokenChange}>
+      <option value="" key="">
+        Select a token
+      </option>
+      {tokenList.map((token, tokenIndex) =>
+        blockSelectedToken &&
+        token.address === blockSelectedToken.address ? null : (
+          <option key={tokenIndex} value={token.symbol}>
+            {token.symbol}
+          </option>
+        )
+      )}
+    </select>
   );
 }
