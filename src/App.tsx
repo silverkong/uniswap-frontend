@@ -13,14 +13,13 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 ///////////////////////
 import ConnectWallet from "./components/ConnectWallet";
 import Portfolio from "./components/Portfolio";
+import SwapNavigator from "./components/SwapNavigator";
 
-// alchemy api key
+// alchemy api key, projectId
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
-
-// 1. Get projectId
 const projectId = import.meta.env.VITE_PROJECT_ID;
 
-// 2. Create wagmiConfig
+// Create wagmiConfig
 const { chains, publicClient } = configureChains(
   [polygon],
   [
@@ -49,7 +48,7 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 
-// 3. Create modal
+// Create modal
 createWeb3Modal({ wagmiConfig, projectId, chains });
 
 function App() {
@@ -57,6 +56,7 @@ function App() {
     <WagmiConfig config={wagmiConfig}>
       <ConnectWallet />
       <Portfolio />
+      <SwapNavigator />
     </WagmiConfig>
   );
 }

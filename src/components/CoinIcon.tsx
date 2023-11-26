@@ -16,22 +16,16 @@ interface CoinIconProps {
   size: CoinIconSize;
   imgSrc: string;
   alt: string;
-  borderColor?: string | null;
   className?: string;
 }
 export const CoinIcon: FC<CoinIconProps> = ({
   size,
   imgSrc,
   alt,
-  borderColor,
   className,
 }) => {
-  const borderStyle = { borderColor: borderColor ?? "#CCCCCC" };
   return (
-    <div
-      style={borderStyle}
-      className={cn(iconSizeOf[size], "border rounded-full", className)}
-    >
+    <div className={cn(iconSizeOf[size], "border rounded-full", className)}>
       <img className="w-full h-full rounded-full" src={imgSrc} alt={alt} />
     </div>
   );

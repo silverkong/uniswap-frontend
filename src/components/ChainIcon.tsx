@@ -9,13 +9,6 @@ interface ChainIconProps {
   borderColor?: string | null;
 }
 
-export const ChainIcon: FC<ChainIconProps> = ({ chain, size, borderColor }) => {
-  return (
-    <CoinIcon
-      alt={chain.name}
-      size={size}
-      imgSrc={chain.logoURI}
-      borderColor={borderColor}
-    />
-  );
+export const ChainIcon: FC<ChainIconProps> = ({ chain, size }) => {
+  return <CoinIcon alt={chain.name} size={size} imgSrc={chain.logoURI} />;
 };

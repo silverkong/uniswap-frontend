@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAccount, useBalance, useNetwork } from "wagmi";
+import { useAccount, useBalance, useNetwork, useSwitchNetwork } from "wagmi";
 import { TokenIcon } from "./TokenIcon";
 import { TokenData } from "../interfaces/data/token-data.interface";
 import { ERC20__factory, Multicall2, Multicall2__factory } from "../typechain";
@@ -30,6 +30,7 @@ export default function Portfolio() {
   const { address: user } = useAccount();
   const { data: balance } = useBalance({ address: user, chainId: 137 });
   const { chain: currentChain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
   // 해당 체인의 토큰 리스트를 ../data/tokens.ts에서 가져옴
   const [tokenList, setTokenList] = useState<TokenData[]>([]);
   const [tokenBalance, setTokenBalance] = useState<string[]>([]);
@@ -44,14 +45,15 @@ export default function Portfolio() {
   };
 
   useEffect(() => {
+    switchNetwork?.(137);
     getBalanceList();
   }, [currentChain, user]);
 
-  // TODO: TokenIcon listing
   return user ? (
     <div>
       {tokenList.map((token, i) => {
         if (balance && i === 0) {
+          // Native Token
           return (
             <div key={i}>
               <TokenIcon token={token} size="md" />
